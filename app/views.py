@@ -18,7 +18,7 @@ def upload():
         data = json.loads(request.data)
         img_url = data.get('img_url')
         name = data.get('name')
-    except Exception, e: # for testing with postman
+    except Exception, e: # for iOS and postman
         img_url = request.form['img_url']
         name = request.form['name']
 
@@ -28,9 +28,15 @@ def upload():
 
 @app.route('/verify', methods=['POST'])
 def verify():
-    data = json.loads(request.data)
-    img_url = data.get('img_url')
-    
+    try:
+        data = json.loads(request.data)
+        img_url = data.get('img_url')
+    except Exception, e:
+        try: # for postman
+            img_url = request.form['img_url']
+        except Exception, e: # for iOS
+            img_url = json.loads(dict(request.form).keys()[0]).get('img_url')
+
     name = kairos.identify_face_url(img_url, DEFAULT_GALLERY)
     allowed = name is not None
     # TODO: open the door.
