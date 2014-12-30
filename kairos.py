@@ -4,6 +4,8 @@ import requests
 import json
 import base64
 
+THRESHOLD = 0.7
+
 def base64_img(fp):
     with open(fp, "rb") as image_file:
         return base64.b64encode(image_file.read())
@@ -40,7 +42,7 @@ def identify_face_file(base64_img, gallery):
     """ returns name of person (string) on success,
         None on failure """
     data = {"image" : base64_img,
-            "threshold" : 0.7,
+            "threshold" : THRESHOLD,
             "gallery_name" : gallery}
 
     r = kairos_post("recognize", data).json()
@@ -55,7 +57,7 @@ def identify_face_url(img_url, gallery):
         None on failure """
 
     data = {"url" : img_url,
-            "threshold" : 0.7,
+            "threshold" : THRESHOLD,
             "gallery_name" : gallery}
 
     r = kairos_post("recognize", data).json()
