@@ -1,6 +1,6 @@
 from app import app
 from flask import Flask, request, jsonify
-from utils import send_text, open_door, google_shorten_url
+from utils import send_text, open_door_async, google_shorten_url
 from random import randint
 import kairos
 import json
@@ -47,8 +47,7 @@ def verify():
     allowed = name is not None
 
     if allowed:
-        # TODO: open the door.
-        open_door()
+        open_door_async()
     else:
         code = randint(1000, 9999)
 
@@ -83,7 +82,7 @@ def handle_text():
 
     if phone_num in APPROVED_NUMS:
         if text == 'open':
-            open_door()
+            open_door_async()
             send_text('Door opened!', phone_num)
         else:
             try:
@@ -93,7 +92,7 @@ def handle_text():
                 ding_dong = PENDING_COLLECTION.find_one({'code': code})
                 if ding_dong: 
                     # allow entry
-                    open_door()
+                    open_door_async()
                     img_url = ding_dong['img_url']
                     PENDING_COLLECTION.remove(ding_dong)
 
