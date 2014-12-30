@@ -18,5 +18,8 @@ def upload(name):
 @app.route('/verify', methods=['GET'])
 def verify():
     link = request.args.get('img_url')
-    allowed = kairos.check_face_url(img_url, DEFAULT_GALLERY)
-    return jsonify({'allowed': allowed})
+    name = kairos.identify_face_url(img_url, DEFAULT_GALLERY)
+    allowed = name is not None
+    # TODO: open the door.
+    return jsonify({'allowed': allowed,
+                    'name': name})
