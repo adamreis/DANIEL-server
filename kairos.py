@@ -24,7 +24,6 @@ def add_face_file(base64_img, name, gallery):
 
     r = kairos_post("enroll", data).json()
 
-    # returns true if this succeeds
     return 'Errors' not in r
 
 def add_face_url(img_url, name, gallery):
@@ -35,7 +34,6 @@ def add_face_url(img_url, name, gallery):
 
     r = kairos_post("enroll", data).json()
 
-    # returns true if this succeeds
     return 'Errors' not in r
 
 def check_face_file(base64_img, gallery):
@@ -66,6 +64,8 @@ def check_face_url(img_url, gallery):
         return None
     else:
         return r.get('images')[0].get('transaction').get('subject')
+
+############# EXAMPLES ###############
 
 # test enroll
 # r = add_face_file(base64_img('test_pix/daniel6.jpg'), 'danielm', 'test')
