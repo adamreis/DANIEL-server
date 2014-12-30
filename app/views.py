@@ -10,7 +10,7 @@ from time import time
 
 DEFAULT_GALLERY = str(time())
 
-APPROVED_NUMS = {'18584058087':'Adam R'}
+APPROVED_NUMS = {'18584058087':'Adam R'}    
 
 PENDING_REQUESTS = {} # {2434 : 'https://asdfsadfasdfasdf'}
 
