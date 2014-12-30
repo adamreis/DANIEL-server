@@ -6,16 +6,16 @@ import kairos
 import json
 import pdb
 from time import time
+from mongo_setup import USER_COLLECTION, PENDING_COLLECTION
 
-DEFAULT_GALLERY = 'tes6'
+DEFAULT_GALLERY = 'test5'
 
-APPROVED_NUMS = {'18584058087':'Adam R'}    
-
-PENDING_REQUESTS = {} # {2434 : 'https://asdfsadfasdfasdf'}
+APPROVED_NUMS = {'18584058087':'Adam R'}
 
 # App Logic
 @app.route('/', methods=['GET'])
 def index():
+    print USER_COLLECTION
     return 'yo'
 
 @app.route('/upload', methods=['POST'])
@@ -50,17 +50,20 @@ def verify():
         # TODO: open the door.
         open_door()
     else:
-        new_id = randint(1000, 9999)
-        while (new_id in PENDING_REQUESTS):
-            new_id = randint(1000, 9999)
+        code = randint(1000, 9999)
 
+        while (PENDING_COLLECTION.find_one({'code': code})):
+            code = randint(1000, 9999)
+
+        ding_dong = {'code': code, 'img_url': img_url}
+        PENDING_COLLECTION.insert(ding_dong)
         PENDING_REQUESTS[new_id] = img_url
 
         short_url = google_shorten_url(img_url)
         text1 = "This person is waiting at your door: {}.".format(short_url)
         text2 = "Reply 'open' \
                 to open the door for them, or '{} <their name>' to save \
-                their face and always let them in.".format(new_id)
+                their face and always let them in.".format(code)
         #TODO: APPROVED_NUMS -> ADMIN_NUMS
         for num in APPROVED_NUMS.iterkeys():
                             send_text(text1, num)
@@ -84,15 +87,17 @@ def handle_text():
             send_text('Door opened!', phone_num)
         else:
             try:
-                identifier, name = text.split() 
-                identifier = int(identifier)
+                code, name = text.split() 
+                code = int(code)
 
-                if identifier in PENDING_REQUESTS:
+                ding_dong = PENDING_COLLECTION.find_one({'code': code})
+                if ding_dong: 
+                    # allow entry
                     open_door()
-                    url = PENDING_REQUESTS[identifier]
-                    del PENDING_REQUESTS[identifier]
+                    img_url = ding_dong['img_url']
+                    PENDING_COLLECTION.remove(ding_dong)
 
-                    success = kairos.add_face_url(url, name, DEFAULT_GALLERY)
+                    success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
                     if success:
                         text = '{} has been granted access by {}'.format(name, APPROVED_NUMS[phone_num])
                         for num in APPROVED_NUMS.iterkeys():

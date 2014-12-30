@@ -10,4 +10,3 @@ USER_COLLECTION = db.daniel_users
 PENDING_COLLECTION = db.pending_ding_dongs
 
 print 'CONNECCTEEEDD'
-
