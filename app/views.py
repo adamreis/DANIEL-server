@@ -13,8 +13,14 @@ DEFAULT_GALLERY = 'test5'
 # App Logic
 @app.route('/', methods=['GET'])
 def index():
-    print USER_COLLECTION
     return 'yo'
+
+@app.route('/users', methods=['GET'])
+def users():
+    users = list(USER_COLLECTION.find())
+    for user in users:
+        user['_id'] = str(user['_id'])
+    return jsonify({'users': users})
 
 @app.route('/upload', methods=['POST'])
 def upload():
