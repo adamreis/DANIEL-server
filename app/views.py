@@ -1,14 +1,13 @@
 from app import app
 from flask import Flask, request, jsonify
-from twilio_driver import send_text
-from arduino import open_door
+from helper_funcs import send_text, open_door, google_shorten_url
 from random import randint
 import kairos
 import json
 import pdb
 from time import time
 
-DEFAULT_GALLERY = str(time())
+DEFAULT_GALLERY = 'tes6'
 
 APPROVED_NUMS = {'18584058087':'Adam R'}    
 
@@ -56,7 +55,9 @@ def verify():
             new_id = randint(1000, 9999)
 
         PENDING_REQUESTS[new_id] = img_url
-        text1 = "This person is waiting at your door: {}.".format(img_url)
+
+        short_url = google_shorten_url(img_url)
+        text1 = "This person is waiting at your door: {}.".format(short_url)
         text2 = "Reply 'open' \
                 to open the door for them, or '{} <their name>' to save \
                 their face and always let them in.".format(new_id)
@@ -106,3 +107,4 @@ def handle_text():
                 send_text('invalid response!', phone_num)
 
     return 'Thanks!', 200
+
