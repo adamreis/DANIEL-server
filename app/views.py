@@ -22,15 +22,16 @@ def upload():
     print 'status of upload: {}'.format(success)
     return jsonify({'success': success})
 
-@app.route('/verify', methods=['GET'])
+@app.route('/verify', methods=['POST'])
 def verify():
-    img_url = request.args.get('img_url')
-
+    data = json.loads(request.data)
+    img_url = data.get('img_url')
+    
     name = kairos.identify_face_url(img_url, DEFAULT_GALLERY)
     allowed = name is not None
     # TODO: open the door.
 
-    print 'status of verification: {}'.format(allowed)
+    print 'status of verification: {}; name: {}'.format(allowed, name)
     return jsonify({'allowed': allowed,
                     'name': name})
 
