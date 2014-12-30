@@ -10,7 +10,7 @@ def index():
     return 'yo'
 
 @app.route('/upload', methods=['POST'])
-def upload(name):
+def upload():
     img_url = request.data['img_url']
     name = request.data['name']
 
