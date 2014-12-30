@@ -1,7 +1,6 @@
 from app import app
 from flask import Flask, request, jsonify
-from twilio_driver import send_text
-from arduino import open_door
+from utils import send_text, open_door_async, google_shorten_url
 from random import randint
 import kairos
 import json
@@ -46,8 +45,7 @@ def verify():
     allowed = name is not None
 
     if allowed:
-        # TODO: open the door.
-        open_door()
+        open_door_async()
     else:
         code = randint(1000, 9999)
 
@@ -56,8 +54,10 @@ def verify():
 
         ding_dong = {'code': code, 'img_url': img_url}
         PENDING_COLLECTION.insert(ding_dong)
+        PENDING_REQUESTS[new_id] = img_url
 
-        text1 = "This person is waiting at your door: {}.".format(img_url)
+        short_url = google_shorten_url(img_url)
+        text1 = "This person is waiting at your door: {}.".format(short_url)
         text2 = "Reply 'open' \
                 to open the door for them, or '{} <their name>' to save \
                 their face and always let them in.".format(code)
@@ -84,7 +84,7 @@ def handle_text():
 
     if phone_num in admin_nums:
         if text == 'open':
-            open_door()
+            open_door_async()
             send_text('Door opened!', phone_num)
         else:
             try:
@@ -94,7 +94,7 @@ def handle_text():
                 ding_dong = PENDING_COLLECTION.find_one({'code': code})
                 if ding_dong: 
                     # allow entry
-                    open_door()
+                    open_door_async()
                     img_url = ding_dong['img_url']
                     PENDING_COLLECTION.remove(ding_dong)
 
@@ -114,3 +114,4 @@ def handle_text():
                 send_text('invalid response!', phone_num)
 
     return 'Thanks!', 200
+
