@@ -21,48 +21,44 @@ def add_face_file(base64_img, name, gallery):
             "subject_id" : "daniel m",
             "gallery_name" : "test"}
 
-    r = kairos_post("enroll", data)
+    r = kairos_post("enroll", data).json()
 
     # returns true if this succeeds
-    return 'Errors' not in r.json()
+    return 'Errors' not in r
 
 def add_face_url(img_url, name, gallery):
     data = {"url" : img_url,
             "subject_id" : "daniel m",
             "gallery_name" : "test"}
 
-    r = kairos_post("enroll", data)
+    r = kairos_post("enroll", data).json()
 
     # returns true if this succeeds
-    return 'Errors' not in r.json()
+    return 'Errors' not in r
 
 def check_face_file(base64_img, gallery):
     data = {"image" : base64_img,
             "threshold" : 0.7,
             "gallery_name" : "test"}
 
-    r = kairos_post("recognize", data)
+    r = kairos_post("recognize", data).json()
 
-    import pdb; pdb.set_trace()
-
-    return True
+    # returns true if this succeeds
+    return r.get('images')[0].get('transaction').get('status') == 'success'
 
 def check_face_url(img_url, gallery):
-    return True
+    data = {"url" : img_url,
+            "threshold" : 0.7,
+            "gallery_name" : "test"}
 
-# # test enroll
+    r = kairos_post("recognize", data).json()
 
+    # returns true if this succeeds
+    return r.get('images')[0].get('transaction').get('status') == 'success'
+
+
+# test enroll
 # r = add_face_file(base64_img('test_pix/daniel6.jpg'), 'danielm', 'test')
-r = check_face_file(base64_img('test_pix/adam3.jpg'), 'test')
 
-import pdb; pdb.set_trace() 
-
-# # test recognize 75%
-# data = {"image" : base64_img('test_pix/daniel6.jpg'),
-#         "threshold" : 0.5,
-#         "gallery_name" : "test"}
-
-# r = kairos_post("recognize", data)
-# print r.json()
-
-print base64_img('test_pix/daniel6.jpg')
+# test recognize
+# r = check_face_file(base64_img('test_pix/daniel6.jpg'), 'test')
