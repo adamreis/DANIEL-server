@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from twilio_driver import send_text
 import kairos
 import json
+import pdb
 
 DEFAULT_GALLERY = 'test1'
 
@@ -13,10 +14,14 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    data = json.loads(request.data)
+    try:
+        data = json.loads(request.data)
+        img_url = data.get('img_url')
+        name = data.get('name')
+    except Exception, e: # for testing with postman
+        img_url = request.form['img_url']
+        name = request.form['name']
 
-    img_url = data.get('img_url')
-    name = data.get('name')
 
     success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     print 'status of upload: {}'.format(success)
