@@ -11,8 +11,6 @@ from mongo_setup import USER_COLLECTION, PENDING_COLLECTION
 
 DEFAULT_GALLERY = 'test5'
 
-APPROVED_NUMS = {'18584058087':'Adam R'}
-
 # App Logic
 @app.route('/', methods=['GET'])
 def index():
@@ -63,10 +61,11 @@ def verify():
         text2 = "Reply 'open' \
                 to open the door for them, or '{} <their name>' to save \
                 their face and always let them in.".format(code)
-        #TODO: APPROVED_NUMS -> ADMIN_NUMS
-        for num in APPROVED_NUMS.iterkeys():
-                            send_text(text1, num)
-                            send_text(text2, num)
+        admins = USER_COLLECTION.find({'admin': True})
+        for user in admins:
+            num = user.get('phone_number')
+            send_text(text1, num)
+            send_text(text2, num)
 
 
     print 'status of verification: {}; name: {}'.format(allowed, name)
@@ -80,7 +79,10 @@ def handle_text():
 
     print 'new text from {}: {}'.format(phone_num, text)
 
-    if phone_num in APPROVED_NUMS:
+    admins = USER_COLLECTION.find({'admin': True})
+    admin_nums = [admin.get('phone_number') for admin in admins]
+
+    if phone_num in admin_nums:
         if text == 'open':
             open_door()
             send_text('Door opened!', phone_num)
@@ -98,8 +100,9 @@ def handle_text():
 
                     success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
                     if success:
-                        text = '{} has been granted access by {}'.format(name, APPROVED_NUMS[phone_num])
-                        for num in APPROVED_NUMS.iterkeys():
+                        admin_name = USER_COLLECTION.find_one({'admin': True, 'phone': phone_num})
+                        text = '{} has been granted access by {}'.format(name, admin_name)
+                        for num in admin_nums:
                             send_text(text, num)
                     else:
                         text = "{}'s picture could not be recognized.  They've been let in, but their picture wasn't saved."
