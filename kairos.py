@@ -36,7 +36,7 @@ def add_face_url(img_url, name, gallery):
 
     return 'Errors' not in r
 
-def check_face_file(base64_img, gallery):
+def identify_face_file(base64_img, gallery):
     """ returns name of person (string) on success,
         None on failure """
     data = {"image" : base64_img,
@@ -50,7 +50,7 @@ def check_face_file(base64_img, gallery):
     else:
         return r.get('images')[0].get('transaction').get('subject')
 
-def check_face_url(img_url, gallery):
+def identify_face_url(img_url, gallery):
     """ returns name of person (string) on success,
         None on failure """
 
