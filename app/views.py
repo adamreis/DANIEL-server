@@ -54,7 +54,6 @@ def verify():
 
         ding_dong = {'code': code, 'img_url': img_url}
         PENDING_COLLECTION.insert(ding_dong)
-        PENDING_REQUESTS[new_id] = img_url
 
         short_url = google_shorten_url(img_url)
         text1 = "This person is waiting at your door: {}.".format(short_url)
