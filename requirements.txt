@@ -3,7 +3,6 @@ Flask-Cors==1.10.2
 Jinja2==2.7.3
 MarkupSafe==0.23
 Werkzeug==0.9.6
-bitly-api==0.3
 httplib2==0.9
 itsdangerous==0.24
 pymongo==2.7.2
