@@ -22,7 +22,6 @@ def upload():
         img_url = request.form['img_url']
         name = request.form['name']
 
-
     success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     print 'status of upload: {}'.format(success)
     return jsonify({'success': success})
