@@ -1,6 +1,6 @@
 from app import app
 from flask import Flask, request, jsonify
-from helper_funcs import send_text, open_door, google_shorten_url
+from utils import send_text, open_door, google_shorten_url
 from random import randint
 import kairos
 import json
