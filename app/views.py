@@ -1,5 +1,6 @@
 from app import app
 from flask import Flask, request, jsonify
+from twilio_driver import send_text
 import kairos
 
 DEFAULT_GALLERY = 'default_gallery'
@@ -26,3 +27,11 @@ def verify():
     # TODO: open the door.
     return jsonify({'allowed': allowed,
                     'name': name})
+
+@app.route('/twilio-hook/',methods=['POST'])
+def handle_text():
+    text = request.values.get('Body')
+    phone_num = request.values.get('From')[1:]
+
+    print 'new text from {}: {}'.format(phone_num, text)
+    return 'Thanks!', 200
