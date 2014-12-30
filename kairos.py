@@ -61,7 +61,7 @@ def identify_face_url(img_url, gallery):
             "gallery_name" : gallery}
 
     r = kairos_post("recognize", data).json()
-
+    import pdb; pdb.set_trace()
     print r.get('images')[0].get('transaction')
 
     if r.get('images')[0].get('transaction').get('status') != 'success':
