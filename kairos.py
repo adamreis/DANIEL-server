@@ -18,8 +18,8 @@ def kairos_post(endpoint, data):
 
 def add_face_file(base64_img, name, gallery):
     data = {"image" : base64_img,
-            "subject_id" : "daniel m",
-            "gallery_name" : "test"}
+            "subject_id" : name,
+            "gallery_name" : gallery}
 
     r = kairos_post("enroll", data).json()
 
@@ -28,8 +28,8 @@ def add_face_file(base64_img, name, gallery):
 
 def add_face_url(img_url, name, gallery):
     data = {"url" : img_url,
-            "subject_id" : "daniel m",
-            "gallery_name" : "test"}
+            "subject_id" : name,
+            "gallery_name" : gallery}
 
     r = kairos_post("enroll", data).json()
 
