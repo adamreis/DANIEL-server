@@ -17,7 +17,6 @@ def kairos_post(endpoint, data):
     return r
 
 def add_face_file(base64_img, name, gallery):
-    # test enroll
     data = {"image" : base64_img,
             "subject_id" : "daniel m",
             "gallery_name" : "test"}
@@ -28,9 +27,24 @@ def add_face_file(base64_img, name, gallery):
     return 'Errors' not in r.json()
 
 def add_face_url(img_url, name, gallery):
-    return True
+    data = {"url" : img_url,
+            "subject_id" : "daniel m",
+            "gallery_name" : "test"}
+
+    r = kairos_post("enroll", data)
+
+    # returns true if this succeeds
+    return 'Errors' not in r.json()
 
 def check_face_file(base64_img, gallery):
+    data = {"image" : base64_img,
+            "threshold" : 0.7,
+            "gallery_name" : "test"}
+
+    r = kairos_post("recognize", data)
+
+    import pdb; pdb.set_trace()
+
     return True
 
 def check_face_url(img_url, gallery):
@@ -38,7 +52,9 @@ def check_face_url(img_url, gallery):
 
 # # test enroll
 
-r = add_face_file(base64_img('test_pix/daniel6.jpg'), 'danielm', 'test')
+# r = add_face_file(base64_img('test_pix/daniel6.jpg'), 'danielm', 'test')
+r = check_face_file(base64_img('test_pix/adam3.jpg'), 'test')
+
 import pdb; pdb.set_trace() 
 
 # # test recognize 75%
