@@ -4,7 +4,7 @@ import requests
 import json
 import base64
 
-THRESHOLD = 0.7
+THRESHOLD = 0.75
 
 def base64_img(fp):
     with open(fp, "rb") as image_file:
@@ -61,6 +61,8 @@ def identify_face_url(img_url, gallery):
             "gallery_name" : gallery}
 
     r = kairos_post("recognize", data).json()
+
+    print r.get('images')[0].get('transaction')
 
     if r.get('images')[0].get('transaction').get('status') != 'success':
         return None
