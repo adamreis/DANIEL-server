@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from twilio_driver import send_text
 import kairos
 
-DEFAULT_GALLERY = 'default_gallery'
+DEFAULT_GALLERY = 'test1'
 
 # App Logic
 @app.route('/', methods=['GET'])
@@ -12,8 +12,8 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload():
-    img_url = request.data['img_url']
-    name = request.data['name']
+    img_url = request.data.get('img_url')
+    name = request.data.get('name')
 
     success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     return jsonify({'success': success})
