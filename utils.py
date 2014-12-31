@@ -8,7 +8,7 @@ import threading
 from mongo_setup import USER_COLLECTION, PENDING_COLLECTION, GALLERY_VERSION
 import kairos
 
-COM_INTERFACE = '/dev/tty.usbmodem1411'
+COM_INTERFACE = '/dev/tty.usbmodem1421'
 BAUD_RATE = 9600
 DEFAULT_GALLERY = 'gallery' + str(GALLERY_VERSION.find_one().get('version'))
 
@@ -77,10 +77,7 @@ def open_door():
         print "couldn't connect to arduino"
         return
     
-    print 'OPENING DOOR!'
+    time.sleep(2)
     ser.write('o')
-    print 'wrote o to serial'
     time.sleep(5)
-    print 'CLOSING DOOR!'
     ser.write('c')
-    print 'wrote c to serial'
