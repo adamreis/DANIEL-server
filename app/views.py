@@ -22,6 +22,39 @@ def users():
         user['_id'] = str(user['_id'])
     return jsonify({'users': users})
 
+@app.route('/users/new', methods=['POST'])
+def users_new():
+    data = json.loads(request.data)
+    name = data.get('name'),
+    img_url = data.get('img_url')
+    admin = data.get('admin')
+    phone_number = data.get('phone_number')
+
+    success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
+
+    if success:
+        user = {
+            'name': name,
+            'img_url': img_url,
+            'admin': admin,
+            'phone_number': phone_number
+        }
+        USER_COLLECTION.insert(user)
+
+    return jsonify({'success': success})
+
+@app.route('/user/<user_id>', methods=['DELETE'])
+def user_delete(user_id):
+    user = USER_COLLECTION.find_one({'_id': ObjectId(user_id)}))
+    name = user.get('name')
+
+    success = kairos.remove_subject(name, DEFAULT_GALLERY)
+
+    if success:
+        USER_COLLECTION.remove(user)
+        
+    return jsonify({'success': True})
+
 @app.route('/upload', methods=['POST'])
 def upload():
     try:
