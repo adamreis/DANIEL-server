@@ -29,14 +29,20 @@ def add_face_file(base64_img, name, gallery):
     return 'Errors' not in r
 
 def add_face_url(img_url, name, gallery):
-    """ returns True on success, False on failure """
+    """ returns name on success, False on failure """
     data = {"url" : img_url,
             "subject_id" : name,
             "gallery_name" : gallery}
 
     r = kairos_post("enroll", data).json()
+    
+    if 'Errors' in r:
+        return False
+    else:
+        name =  r.get('images')[0].get('transaction').get('subject_id')
+        print 'new subject_id: {}!!!!!!'.format(name)
+        return name
 
-    return 'Errors' not in r
 
 def identify_face_file(base64_img, gallery):
     """ returns name of person (string) on success,

@@ -8,7 +8,7 @@ import pdb
 from time import time
 from mongo_setup import USER_COLLECTION, PENDING_COLLECTION
 
-DEFAULT_GALLERY = 'test5'
+DEFAULT_GALLERY = 'adam4'
 
 # App Logic
 @app.route('/', methods=['GET'])
@@ -68,7 +68,7 @@ def verify():
                 their face and always let them in.".format(code)
         admins = USER_COLLECTION.find({'admin': True})
         for user in admins:
-            num = user.get('phone_number')
+            num = user.get('phone')
             send_text(text1, num)
             send_text(text2, num)
 
@@ -85,7 +85,7 @@ def handle_text():
     print 'new text from {}: {}'.format(phone_num, text)
 
     admins = USER_COLLECTION.find({'admin': True})
-    admin_nums = [admin.get('phone_number') for admin in admins]
+    admin_nums = [admin.get('phone') for admin in admins]
 
     if phone_num in admin_nums:
         if text == 'open':
@@ -93,7 +93,9 @@ def handle_text():
             send_text('Door opened!', phone_num)
         else:
             try:
-                code, name = text.split() 
+                l = text.split()
+                code = l[0]
+                name = ' '.join(l[1:])
                 code = int(code)
 
                 ding_dong = PENDING_COLLECTION.find_one({'code': code})
@@ -102,7 +104,6 @@ def handle_text():
                     open_door_async()
                     img_url = ding_dong['img_url']
                     PENDING_COLLECTION.remove(ding_dong)
-
                     success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
                     if success:
                         admin_name = USER_COLLECTION.find_one({'admin': True, 'phone': phone_num})
