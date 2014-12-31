@@ -6,7 +6,7 @@ import serial
 import time
 import threading
 
-COM_INTERFACE = 'COM22'
+COM_INTERFACE = '/dev/tty.usbmodem1411'
 BAUD_RATE = 9600
 
 def send_text(msg, to_num):
@@ -31,8 +31,9 @@ def google_shorten_url(url):
 
 
 def open_door_async():
-    thr = threading.Thread(target=open_door, args=(), kwargs={})
-    thr.start()
+    # thr = threading.Thread(target=open_door, args=(), kwargs={})
+    # thr.start()
+    open_door()
 
 def open_door():
     # open for 5 seconds
@@ -44,9 +45,11 @@ def open_door():
     
     print 'OPENING DOOR!'
     ser.write('o')
+    print 'wrote o to serial'
     time.sleep(5)
     print 'CLOSING DOOR!'
     ser.write('c')
+    print 'wrote c to serial'
 
 if __name__ == "__main__":
     main()
