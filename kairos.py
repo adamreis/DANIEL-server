@@ -68,6 +68,17 @@ def identify_face_url(img_url, gallery):
     else:
         return r.get('images')[0].get('transaction').get('subject')
 
+def remove_subject(subject_id, gallery):
+    """ returns True always """
+
+    data = {"subject_id" : subject_id,
+            "gallery_name" : gallery }
+
+    r = kairos_post("remove_subject", data).json()
+
+    #TODO: this should only return true when this works
+    return True
+
 ############# EXAMPLES ###############
 
 # test enroll
