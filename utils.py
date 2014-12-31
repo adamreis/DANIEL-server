@@ -31,9 +31,8 @@ def google_shorten_url(url):
 
 
 def open_door_async():
-    # thr = threading.Thread(target=open_door, args=(), kwargs={})
-    # thr.start()
-    open_door()
+    thr = threading.Thread(target=open_door, args=(), kwargs={})
+    thr.start()
 
 def open_door():
     # open for 5 seconds

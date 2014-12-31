@@ -15,6 +15,11 @@ DEFAULT_GALLERY = 'adam4'
 def index():
     return 'yo'
 
+@app.route('/open', methods=['POST'])
+def open():
+    open_door_async()
+    return jsonify({'message': 'Opening door!'})
+
 @app.route('/users', methods=['GET'])
 def users():
     users = list(USER_COLLECTION.find())
