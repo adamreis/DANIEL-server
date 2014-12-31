@@ -45,7 +45,7 @@ def users_new():
 
 @app.route('/user/<user_id>', methods=['DELETE'])
 def user_delete(user_id):
-    user = USER_COLLECTION.find_one({'_id': ObjectId(user_id)}))
+    user = USER_COLLECTION.find_one({'_id': ObjectId(user_id)})
     kairos_id = user.get('kairos_id')
 
     success = kairos.remove_subject(kairos_id, DEFAULT_GALLERY)
