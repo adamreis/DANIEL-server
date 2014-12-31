@@ -22,18 +22,37 @@ def users():
         user['_id'] = str(user['_id'])
     return jsonify({'users': users})
 
-@app.route('/upload', methods=['POST'])
-def upload():
-    try:
-        data = json.loads(request.data)
-        img_url = data.get('img_url')
-        name = data.get('name')
-    except Exception, e: # for iOS and postman
-        img_url = request.form['img_url']
-        name = request.form['name']
+@app.route('/users/new', methods=['POST'])
+def users_new():
+    data = json.loads(request.data)
+    name = data.get('name'),
+    img_url = data.get('img_url')
+    admin = data.get('admin')
+    phone = data.get('phone')
 
-    success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
-    print 'status of upload: {}'.format(success)
+    kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
+    if kairos_id:
+        user = {
+            'name': name,
+            'img_url': img_url,
+            'admin': admin,
+            'phone': phone,
+            'kairos_id': kairos_id
+        }
+        USER_COLLECTION.insert(user)
+
+    return jsonify({'success': kairos_id is not None})
+
+@app.route('/user/<user_id>', methods=['DELETE'])
+def user_delete(user_id):
+    user = USER_COLLECTION.find_one({'_id': ObjectId(user_id)})
+    kairos_id = user.get('kairos_id')
+
+    success = kairos.remove_subject(kairos_id, DEFAULT_GALLERY)
+
+    if success:
+        USER_COLLECTION.remove(user)
+
     return jsonify({'success': success})
 
 @app.route('/verify', methods=['POST'])
@@ -104,12 +123,25 @@ def handle_text():
                     open_door_async()
                     img_url = ding_dong['img_url']
                     PENDING_COLLECTION.remove(ding_dong)
-                    success = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
-                    if success:
+
+                    kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
+                    if kairos_id:
+                        # let admins know entry allowed
                         admin_name = USER_COLLECTION.find_one({'admin': True, 'phone': phone_num})
                         text = '{} has been granted access by {}'.format(name, admin_name)
                         for num in admin_nums:
                             send_text(text, num)
+
+                        # create new user in db
+                        user = {
+                            'name': name,
+                            'img_url': img_url,
+                            'admin': False,
+                            'phone': None,
+                            'kairos_id': kairos_id
+                        }
+                        USER_COLLECTION.insert(user)
+
                     else:
                         text = "{}'s picture could not be recognized.  They've been let in, but their picture wasn't saved."
                         send_text(text, phone_num)
