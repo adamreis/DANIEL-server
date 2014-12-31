@@ -1,14 +1,12 @@
 from app import app
 from flask import Flask, request, jsonify
-from utils import send_text, open_door_async, google_shorten_url
+from utils import send_text, open_door_async, google_shorten_url, DEFAULT_GALLERY
 from random import randint
 import kairos
 import json
 import pdb
 from time import time
 from mongo_setup import USER_COLLECTION, PENDING_COLLECTION
-
-DEFAULT_GALLERY = 'adam4'
 
 # App Logic
 @app.route('/', methods=['GET'])

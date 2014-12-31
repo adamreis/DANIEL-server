@@ -8,5 +8,6 @@ db.authenticate(MONGOHQ_USER, MONGOHQ_PWD)
 
 USER_COLLECTION = db.daniel_users
 PENDING_COLLECTION = db.pending_ding_dongs
+GALLERY_VERSION = db.daniel_gallery_version
 
 print 'CONNECCTEEEDD'
