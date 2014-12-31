@@ -6,7 +6,7 @@ import serial
 import time
 import threading
 
-COM_INTERFACE = '/dev/tty.usbmodem1411'
+COM_INTERFACE = '/dev/tty.usbmodem1421'
 BAUD_RATE = 9600
 
 def send_text(msg, to_num):
@@ -42,13 +42,10 @@ def open_door():
         print "couldn't connect to arduino"
         return
     
-    print 'OPENING DOOR!'
+    time.sleep(2)
     ser.write('o')
-    print 'wrote o to serial'
     time.sleep(5)
-    print 'CLOSING DOOR!'
     ser.write('c')
-    print 'wrote c to serial'
 
 if __name__ == "__main__":
     main()
