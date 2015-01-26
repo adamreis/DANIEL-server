@@ -1,5 +1,5 @@
 from secrets import KAIROS_APP_ID, KAIROS_APP_KEY
-
+import threading
 import requests
 import json
 import base64
@@ -28,11 +28,16 @@ def add_face_file(base64_img, name, gallery):
 
     return 'Errors' not in r
 
+def add_face_url_async(img_url, name, gallery):
+    thr = threading.Thread(target=add_face_url, args=(img_url, name, gallery), kwargs={})
+    thr.start()
+
 def add_face_url(img_url, name, gallery):
     """ returns name on success, False on failure """
     data = {"url" : img_url,
             "subject_id" : name,
             "gallery_name" : gallery}
+
 
     r = kairos_post("enroll", data).json()
     
@@ -80,7 +85,7 @@ def remove_subject(subject_id, gallery):
     data = {"subject_id" : subject_id,
             "gallery_name" : gallery }
 
-    r = kairos_post("remove_subject", data).json()
+    r = kairos_post("gallery/remove_subject", data)
 
     #TODO: this should only return true when this works
     return True

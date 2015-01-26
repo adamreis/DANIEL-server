@@ -1,17 +1,23 @@
 from app import app
 from flask import Flask, request, jsonify
-from utils import send_text, open_door_async, google_shorten_url, DEFAULT_GALLERY
+from utils import send_text, open_door_async, google_shorten_url, DEFAULT_GALLERY, reset_db
 from random import randint
 import kairos
 import json
 import pdb
 from time import time
 from mongo_setup import USER_COLLECTION, PENDING_COLLECTION
+from bson.objectid import ObjectId
 
 # App Logic
 @app.route('/', methods=['GET'])
 def index():
     return 'yo'
+
+@app.route('/reset', methods=['GET'])
+def reset():
+    reset_db()
+    return 'reset!'
 
 @app.route('/open', methods=['POST'])
 def open():
@@ -28,11 +34,10 @@ def users():
 @app.route('/users/new', methods=['POST'])
 def users_new():
     data = json.loads(request.data)
-    name = data.get('name'),
+    name = data.get('name')
     img_url = data.get('img_url')
     admin = data.get('admin')
     phone = data.get('phone')
-
     kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     if kairos_id:
         user = {
@@ -74,6 +79,7 @@ def verify():
 
     if allowed:
         open_door_async()
+        kairos.add_face_url_async(img_url, name, DEFAULT_GALLERY)
     else:
         code = randint(1000, 9999)
 
@@ -84,15 +90,11 @@ def verify():
         PENDING_COLLECTION.insert(ding_dong)
 
         short_url = google_shorten_url(img_url)
-        text1 = "This person is waiting at your door: {}.".format(short_url)
-        text2 = "Reply 'open' \
-                to open the door for them, or '{} <their name>' to save \
-                their face and always let them in.".format(code)
+        text = "Ding dong! You have a visitor: {}. Reply 'open' to open the door, or '{} <their name>' to save their face and always let them in.".format(short_url, code)
         admins = USER_COLLECTION.find({'admin': True})
         for user in admins:
             num = user.get('phone')
-            send_text(text1, num)
-            send_text(text2, num)
+            send_text(text, num)
 
 
     print 'status of verification: {}; name: {}'.format(allowed, name)
@@ -110,7 +112,7 @@ def handle_text():
     admin_nums = [admin.get('phone') for admin in admins]
 
     if phone_num in admin_nums:
-        if text == 'open':
+        if text.lower() == 'open':
             open_door_async()
             send_text('Door opened!', phone_num)
         else:
@@ -124,17 +126,16 @@ def handle_text():
                 if ding_dong: 
                     # allow entry
                     open_door_async()
-                    img_url = ding_dong['img_url']
+                    img_url = ding_dong.get('img_url')
+                    
                     PENDING_COLLECTION.remove(ding_dong)
-
                     kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
                     if kairos_id:
                         # let admins know entry allowed
-                        admin_name = USER_COLLECTION.find_one({'admin': True, 'phone': phone_num})
+                        admin_name = USER_COLLECTION.find_one({'admin': True, 'phone': phone_num}).get('name')
                         text = '{} has been granted access by {}'.format(name, admin_name)
                         for num in admin_nums:
                             send_text(text, num)
-
                         # create new user in db
                         user = {
                             'name': name,
@@ -144,6 +145,7 @@ def handle_text():
                             'kairos_id': kairos_id
                         }
                         USER_COLLECTION.insert(user)
+                        print 'inserted new users: {}'.format(user)
 
                     else:
                         text = "{}'s picture could not be recognized.  They've been let in, but their picture wasn't saved."

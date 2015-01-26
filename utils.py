@@ -27,12 +27,23 @@ def reset_db():
     print 'version now ' + DEFAULT_GALLERY
 
     # add user to new gallery
-    name = 'Adam with image of Dan Golman'
-    img_url = 'https://www.filepicker.io/api/file/PblYN4wQJ2mc3t1QopwJ' # TODO: This is actually Dan.
+    name = 'Adam'
+    img_url = 'http://files.parsetfss.com/c314ef28-203e-4df7-8043-6898ff73593d/tfss-28df3310-1945-492b-96eb-f39ab493efea-img-31-12-14--11-25-20.png'
     kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     if kairos_id:
         user = {'name': name,
                 'phone': '18584058087',
+                'admin': True,
+                'img_url': img_url,
+                'kairos_id': kairos_id}
+        USER_COLLECTION.insert(user)
+    
+    name = 'Samantha'
+    img_url = 'http://files.parsetfss.com/c314ef28-203e-4df7-8043-6898ff73593d/tfss-fb417214-782b-4ccf-8cfc-746d80eb2279-img-31-12-14--11-48-29.png'
+    kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
+    if kairos_id:
+        user = {'name': name,
+                'phone': '19548959025',
                 'admin': True,
                 'img_url': img_url,
                 'kairos_id': kairos_id}
