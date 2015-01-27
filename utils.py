@@ -7,10 +7,12 @@ import time
 import threading
 from mongo_setup import USER_COLLECTION, PENDING_COLLECTION, GALLERY_VERSION
 import kairos
+import os
+import fnmatch
 
-COM_INTERFACE = '/dev/tty.usbmodem1421'
 BAUD_RATE = 9600
 DEFAULT_GALLERY = 'gallery' + str(GALLERY_VERSION.find_one().get('version'))
+SERIAL_CONNECTION = [None]
 
 # db helpers
 def reset_db():
@@ -24,7 +26,7 @@ def reset_db():
     global DEFAULT_GALLERY
     version = GALLERY_VERSION.find_one().get('version')
     DEFAULT_GALLERY = 'gallery' + str(version)
-    print 'version now ' + DEFAULT_GALLERY
+    print('version now ' + DEFAULT_GALLERY)
 
     # add user to new gallery
     name = 'Adam'
@@ -32,25 +34,14 @@ def reset_db():
     kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
     if kairos_id:
         user = {'name': name,
-                'phone': '18584058087',
+                'phone': 'XXXXXXXXXXX',
                 'admin': True,
                 'img_url': img_url,
                 'kairos_id': kairos_id}
         USER_COLLECTION.insert(user)
     
-    name = 'Samantha'
-    img_url = 'http://files.parsetfss.com/c314ef28-203e-4df7-8043-6898ff73593d/tfss-fb417214-782b-4ccf-8cfc-746d80eb2279-img-31-12-14--11-48-29.png'
-    kairos_id = kairos.add_face_url(img_url, name, DEFAULT_GALLERY)
-    if kairos_id:
-        user = {'name': name,
-                'phone': '19548959025',
-                'admin': True,
-                'img_url': img_url,
-                'kairos_id': kairos_id}
-        USER_COLLECTION.insert(user)
-        print 'reset_db: success'
     else:
-        print 'reset_db: could not add default admin to kairos'
+        print('reset_db: could not add default admin to kairos')
 
 
 # SMS helpers
@@ -61,9 +52,9 @@ def send_text(msg, to_num):
                                             to='+'+to_num, 
                                             from_="+16198412130")
     try:
-        print 'message sent: {}'.format(message.sid)
+        print('message sent: {}'.format(message.sid))
     except TwilioRestException:
-        print 'message could not be delivered'
+        print('message could not be delivered')
 
 # send_text("someone is waiting: https://www.filepicker.io/api/file/PblYN4wQJ2mc3t1QopwJ text 'open' to open, or 352 to add this user", "18584058087")
 
@@ -74,6 +65,39 @@ def google_shorten_url(url):
     r = requests.post(post_url, data=json.dumps(payload), headers=headers)
     return json.loads(r.text).get('id')
 
+def find(pattern, path):
+    """
+    From Nadia Alramli's answer: http://stackoverflow.com/questions/1724693/find-a-file-in-python
+    """
+    result = []
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            if fnmatch.fnmatch(name, pattern):
+                result.append(os.path.join(root, name))
+    return result
+
+def find_serial_interface():
+    possibilities = find('tty.usbmodem*', '/dev/')
+    if not possibilities:
+        raise Exception("Can't find any serial usb modems")
+    elif len(possibilities) == 1:
+        return possibilities[0]
+    else:
+        for i, f in enumerate(possibilities):
+            print('[{}] {}'.format(i, f))
+        idx = int(input('Which file # is correct? '))
+        return possibilities[idx]
+
+def connect_to_arduino():
+    com_interface = find_serial_interface()
+    print("com_interface: {}".format(com_interface))
+    try:
+        SERIAL_CONNECTION[0] = serial.Serial(com_interface, BAUD_RATE)
+    except:
+        print("couldn't connect to arduino")
+        SERIAL_CONNECTION[0] = None
+    time.sleep(2)
+
 
 # robot parts
 def open_door_async():
@@ -83,12 +107,10 @@ def open_door_async():
 def open_door():
     # open for 5 seconds
     try:
-        ser = serial.Serial(COM_INTERFACE, BAUD_RATE)    
+        SERIAL_CONNECTION[0].write('o')
+        time.sleep(5)
+        SERIAL_CONNECTION[0].write('c')
     except:
-        print "couldn't connect to arduino"
-        return
-    
-    time.sleep(2)
-    ser.write('o')
-    time.sleep(5)
-    ser.write('c')
+        print("attempting to reconnect to arduino")
+        connect_to_arduino()
+        open_door()
